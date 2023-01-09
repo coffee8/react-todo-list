@@ -6,20 +6,31 @@ import PostForm from "./components/PostForm";
 function App() {
 
     const [posts, setPosts] = useState([
-        {id: '1', title: 'Some Plan', body: 'Description'},
-        {id: '2', title: 'Some Plan', body: 'Description'},
-        {id: '3', title: 'Some Plan', body: 'Description'},
+        {id: '1', title: 'My first plan - 1', body: 'Description 1'},
+        {id: '2', title: 'My second plan - 2', body: 'Description 2'},
+        {id: '3', title: 'My third plan - 3', body: 'Description 3'},
     ]);
 
-    const createNewPost = (newPost) => (
-        setPosts(prevPosts => [...prevPosts, newPost])
-    );
+    const createNewPost = (newPost) => {
+        setPosts(prevPosts => [...prevPosts, newPost]);
+    };
+
+    const removePost = (post) => {
+        setPosts(posts.filter(p => p.id !== post.id));
+    };
 
 
     return (
         <div className="App">
             <PostForm create={createNewPost}/>
-            <PostList posts={posts} title={'Plans List'}/>
+            {posts.length ?
+                <PostList posts={posts} title={'Plans List'} remove={removePost}/>
+                :
+                <h1 style={{textAlign: 'center'}}>
+                    There are no posts yet!
+                </h1>
+            }
+
         </div>
     );
 }
