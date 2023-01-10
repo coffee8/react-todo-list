@@ -43,13 +43,7 @@ function App() {
                           onChange={sortPosts}
                 />
             </div>
-            {posts.length ?
-                <PostList posts={posts} title={'Plans List'} remove={removePost}/>
-                :
-                <h1 style={{textAlign: 'center'}}>
-                    There are no posts yet!
-                </h1>
-            }
+            <PostList posts={posts} title={'Plans List'} remove={removePost}/>
 
         </div>
     );
