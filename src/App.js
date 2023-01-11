@@ -7,6 +7,7 @@ import MyModal from "./components/UI/modal/MyModal";
 import MyButton from "./components/UI/button/MyButton";
 import {usePosts} from "./hooks/usePosts";
 import PostService from "./API/PostService";
+import Loader from "./components/UI/loader/Loader";
 
 function App() {
 
@@ -49,7 +50,7 @@ function App() {
                         setFilter={setFilter}
             />
             {isFetching
-                ? <h1>Loading...</h1>
+                ? <div style={{display: 'flex', justifyContent: 'center', marginTop: '50px'}}><Loader/></div>
                 : <PostList posts={searchedPost} title={'Plans List'} remove={removePost}/>}
         </div>
     );
