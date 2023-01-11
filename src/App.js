@@ -1,4 +1,4 @@
-import React, {useMemo, useState} from "react";
+import React, {useEffect, useState} from "react";
 import './styles/App.css';
 import PostList from "./components/PostList";
 import PostForm from "./components/PostForm";
@@ -6,18 +6,19 @@ import PostFilter from "./components/PostFilter";
 import MyModal from "./components/UI/modal/MyModal";
 import MyButton from "./components/UI/button/MyButton";
 import {usePosts} from "./hooks/usePosts";
+import PostService from "./API/PostService";
 
 function App() {
 
-    const [posts, setPosts] = useState([
-        {id: '1', title: 'Idk', body: 'Description 1'},
-        {id: '2', title: 'Some post', body: 'Description 2'},
-        {id: '3', title: 'Aaa ta', body: 'Description 3'},
-    ]);
-
+    const [posts, setPosts] = useState([]);
     const [filter, setFilter] = useState({sort: '', query: ''});
     const [modal, setModal] = useState(false);
     const searchedPost = usePosts(filter.sort, filter.query, posts);
+    const [isFetching, setIsFetching] = useState(false);
+
+    useEffect(() => {
+        fetchPosts();
+    }, []);
 
     const createNewPost = (newPost) => {
         setPosts(prevPosts => [...prevPosts, newPost]);
@@ -28,6 +29,12 @@ function App() {
         setPosts(posts.filter(p => p.id !== post.id));
     };
 
+    async function fetchPosts() {
+        setIsFetching(true);
+        const posts = await PostService.getAll();
+        setPosts(posts);
+        setIsFetching(false);
+    }
 
     return (
         <div className="App">
@@ -41,7 +48,9 @@ function App() {
             <PostFilter filter={filter}
                         setFilter={setFilter}
             />
-            <PostList posts={searchedPost} title={'Plans List'} remove={removePost}/>
+            {isFetching
+                ? <h1>Loading...</h1>
+                : <PostList posts={searchedPost} title={'Plans List'} remove={removePost}/>}
         </div>
     );
 }
