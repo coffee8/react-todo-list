@@ -8,6 +8,7 @@ import MyButton from "./components/UI/button/MyButton";
 import {usePosts} from "./hooks/usePosts";
 import PostService from "./API/PostService";
 import Loader from "./components/UI/loader/Loader";
+import {useFetching} from "./hooks/useFetching";
 
 function App() {
 
@@ -15,7 +16,10 @@ function App() {
     const [filter, setFilter] = useState({sort: '', query: ''});
     const [modal, setModal] = useState(false);
     const searchedPost = usePosts(filter.sort, filter.query, posts);
-    const [isFetching, setIsFetching] = useState(false);
+    const [fetchPosts, isPostsLoading, postError] = useFetching( async () => {
+        const posts = await PostService.getAll();
+        setPosts(posts);
+    });
 
     useEffect(() => {
         fetchPosts();
@@ -30,13 +34,6 @@ function App() {
         setPosts(posts.filter(p => p.id !== post.id));
     };
 
-    async function fetchPosts() {
-        setIsFetching(true);
-        const posts = await PostService.getAll();
-        setPosts(posts);
-        setIsFetching(false);
-    }
-
     return (
         <div className="App">
             <MyButton onClick={() => setModal(true)}>
@@ -49,7 +46,11 @@ function App() {
             <PostFilter filter={filter}
                         setFilter={setFilter}
             />
-            {isFetching
+            {postError &&
+                <h1>Some error {postError.message}</h1>
+
+            }
+            {isPostsLoading
                 ? <div style={{display: 'flex', justifyContent: 'center', marginTop: '50px'}}><Loader/></div>
                 : <PostList posts={searchedPost} title={'Plans List'} remove={removePost}/>}
         </div>
