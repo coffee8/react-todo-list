@@ -9,6 +9,7 @@ import {usePosts} from "./hooks/usePosts";
 import PostService from "./API/PostService";
 import Loader from "./components/UI/loader/Loader";
 import {useFetching} from "./hooks/useFetching";
+import {getPagesArray, getPagesCount} from "./utils/pages";
 
 function App() {
 
@@ -16,10 +17,16 @@ function App() {
     const [filter, setFilter] = useState({sort: '', query: ''});
     const [modal, setModal] = useState(false);
     const searchedPost = usePosts(filter.sort, filter.query, posts);
-    const [fetchPosts, isPostsLoading, postError] = useFetching( async () => {
-        const posts = await PostService.getAll();
-        setPosts(posts);
+    const [totalPages, setTotalPages] = useState(0);
+    const [limit, setLimit] = useState(10);
+    const [page, setPage] = useState(1);
+    const [fetchPosts, isPostsLoading, postError] = useFetching(async () => {
+        const response = await PostService.getAll(limit, page);
+        setPosts(response.data);
+        const totalCount = response.headers['x-total-count'];
+        setTotalPages(getPagesCount(totalCount, limit));
     });
+    const pagesArray = getPagesArray(totalPages);
 
     useEffect(() => {
         fetchPosts();
@@ -48,11 +55,18 @@ function App() {
             />
             {postError &&
                 <h1>Some error {postError.message}</h1>
-
             }
             {isPostsLoading
                 ? <div style={{display: 'flex', justifyContent: 'center', marginTop: '50px'}}><Loader/></div>
                 : <PostList posts={searchedPost} title={'Plans List'} remove={removePost}/>}
+            <div className='page-wrapper'>
+                {pagesArray.map(p =>
+                    <button onClick={() => setPage(p)}
+                              className={page === p ? `page-button page-current` : 'page-button'}
+                              key={p}>
+                        {p}
+                    </button>)}
+            </div>
         </div>
     );
 }

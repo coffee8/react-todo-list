@@ -1,8 +1,10 @@
 .myButton {
     padding: 5px 15px;
+    margin: 1px;
     color: burlywood;
     font-size: 14px;
     background: transparent;
     border: 1px solid burlywood;
     cursor: pointer;
 }
+

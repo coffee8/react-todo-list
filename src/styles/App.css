@@ -36,3 +36,22 @@
     transform: translateX(-300px);
     transition: all 500ms ease-in;
 }
+
+.page-wrapper {
+    margin: 10px;
+    display: flex;
+}
+
+.page-button {
+    padding: 5px;
+    margin: 1px;
+    color: burlywood;
+    font-size: 14px;
+    background: transparent;
+    border: 1px solid burlywood;
+    cursor: pointer;
+}
+
+.page-current {
+    border: 2px solid saddlebrown;
+}
