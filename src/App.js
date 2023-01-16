@@ -20,7 +20,7 @@ function App() {
     const [totalPages, setTotalPages] = useState(0);
     const [limit, setLimit] = useState(10);
     const [page, setPage] = useState(1);
-    const [fetchPosts, isPostsLoading, postError] = useFetching(async () => {
+    const [fetchPosts, isPostsLoading, postError] = useFetching(async (limit, page) => {
         const response = await PostService.getAll(limit, page);
         setPosts(response.data);
         const totalCount = response.headers['x-total-count'];
@@ -29,8 +29,9 @@ function App() {
     const pagesArray = getPagesArray(totalPages);
 
     useEffect(() => {
-        fetchPosts();
+        fetchPosts(limit, page);
     }, []);
+
 
     const createNewPost = (newPost) => {
         setPosts(prevPosts => [...prevPosts, newPost]);
@@ -39,6 +40,11 @@ function App() {
 
     const removePost = (post) => {
         setPosts(posts.filter(p => p.id !== post.id));
+    };
+
+    const changePage = (page) => {
+        setPage(page);
+        fetchPosts(limit, page);
     };
 
     return (
@@ -58,14 +64,13 @@ function App() {
             }
             {isPostsLoading
                 ? <div style={{display: 'flex', justifyContent: 'center', marginTop: '50px'}}><Loader/></div>
-                : <PostList posts={searchedPost} title={'Plans List'} remove={removePost}/>}
+                : <PostList posts={searchedPost} title={'Plans List'} remove={removePost}/>
+            }
             <div className='page-wrapper'>
-                {pagesArray.map(p =>
-                    <button onClick={() => setPage(p)}
-                              className={page === p ? `page-button page-current` : 'page-button'}
-                              key={p}>
-                        {p}
-                    </button>)}
+                {pagesArray.map(p => <span onClick={() => changePage(p)}
+                                           className={page === p ? `page-button page-current` : 'page-button'}
+                                           key={p}> {p}
+                    </span>)}
             </div>
         </div>
     );
