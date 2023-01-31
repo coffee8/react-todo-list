@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import './../styles/App.css';
 import {usePosts} from "../hooks/usePosts";
 import {useFetching} from "../hooks/useFetching";
@@ -24,14 +24,33 @@ function Posts() {
     const [page, setPage] = useState(1);
     const [fetchPosts, isPostsLoading, postError] = useFetching(async (limit, page) => {
         const response = await PostService.getAll(limit, page);
-        setPosts(response.data);
+        setPosts([...posts, ...response.data]);
         const totalCount = response.headers['x-total-count'];
         setTotalPages(getPagesCount(totalCount, limit));
     });
+    const lastElement = useRef();
+    const observer = useRef();
+
+    useEffect(() => {
+        if(isPostsLoading) return;
+        if(observer.current) observer.current.disconnect();
+        const options = {
+            root: document,
+        };
+
+        const handleIntersect = (entries, observer) => {
+            if(entries[0].isIntersecting && page < totalPages) {
+                setPage(prev => prev + 1);
+            }
+        }
+
+        observer.current = new IntersectionObserver(handleIntersect, options);
+        observer.current.observe(lastElement.current);
+    }, [isPostsLoading]);
 
     useEffect(() => {
         fetchPosts(limit, page);
-    }, []);
+    }, [page]);
 
 
     const createNewPost = (newPost) => {
@@ -45,7 +64,6 @@ function Posts() {
 
     const changePage = (page) => {
         setPage(page);
-        fetchPosts(limit, page);
     };
 
     return (
@@ -60,13 +78,12 @@ function Posts() {
             <PostFilter filter={filter}
                         setFilter={setFilter}
             />
-            {postError &&
-                <h1>Some error {postError.message}</h1>
-            }
-            {isPostsLoading
-                ? <div style={{display: 'flex', justifyContent: 'center', marginTop: '50px'}}><Loader/></div>
-                : <PostList posts={searchedPost} title={'Plans List'} remove={removePost}/>
-            }
+            {postError && <h1>Some error {postError.message}</h1>}
+            <PostList posts={searchedPost} title={'Plans List'} remove={removePost}/>
+            <div ref={lastElement} style={{height: '20px', background: 'red'}}/>
+            {isPostsLoading && <div style={{display: 'flex', justifyContent: 'center', marginTop: '50px'}}><Loader/></div>}
+
+
             <Pagination totalPages={totalPages}
                         changePage={changePage}
                         page={page}/>
